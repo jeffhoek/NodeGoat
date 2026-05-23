@@ -12,6 +12,13 @@ function ResearchHandler(db) {
     this.displayResearch = (req, res) => {
 
         if (req.query.symbol) {
+            const ALLOWED_URL = "https://finance.yahoo.com/quote/";
+            if (req.query.url !== ALLOWED_URL) {
+                return res.status(400).send("Invalid research URL");
+            }
+            if (!/^[A-Z0-9.\-\^]{1,10}$/i.test(req.query.symbol)) {
+                return res.status(400).send("Invalid stock symbol");
+            }
             const url = req.query.url + req.query.symbol;
             return needle.get(url, (error, newResponse, body) => {
                 if (!error && newResponse.statusCode === 200) {

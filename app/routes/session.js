@@ -109,12 +109,11 @@ function SessionHandler(db) {
             // then the old session id will render useless as the logged-in user with new privileges
             // holds a new session id now.
 
-            // Fix the problem by regenerating a session in each login
-            // by wrapping the below code as a function callback for the method req.session.regenerate()
-            // i.e:
-            // `req.session.regenerate(() => {})`
-            req.session.userId = user._id;
-            return res.redirect(user.isAdmin ? "/benefits" : "/dashboard");
+            // Fix for A2 - regenerate session ID on login to prevent session fixation
+            return req.session.regenerate(() => {
+                req.session.userId = user._id;
+                return res.redirect(user.isAdmin ? "/benefits" : "/dashboard");
+            });
         });
     };
 

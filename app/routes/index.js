@@ -51,13 +51,9 @@ const index = (app, db) => {
     app.get("/contributions", isLoggedIn, contributionsHandler.displayContributions);
     app.post("/contributions", isLoggedIn, contributionsHandler.handleContributionsUpdate);
 
-    // Benefits Page
-    app.get("/benefits", isLoggedIn, benefitsHandler.displayBenefits);
-    app.post("/benefits", isLoggedIn, benefitsHandler.updateBenefits);
-    /* Fix for A7 - checks user role to implement  Function Level Access Control
-     app.get("/benefits", isLoggedIn, isAdmin, benefitsHandler.displayBenefits);
-     app.post("/benefits", isLoggedIn, isAdmin, benefitsHandler.updateBenefits);
-     */
+    // Benefits Page — admin only (Fix for A7 - Function Level Access Control)
+    app.get("/benefits", isLoggedIn, isAdmin, benefitsHandler.displayBenefits);
+    app.post("/benefits", isLoggedIn, isAdmin, benefitsHandler.updateBenefits);
 
     // Allocations Page
     app.get("/allocations/:userId", isLoggedIn, allocationsHandler.displayAllocations);
@@ -68,7 +64,12 @@ const index = (app, db) => {
 
     // Handle redirect for learning resources link
     app.get("/learn", isLoggedIn, (req, res) => {
-        // Insecure way to handle redirects by taking redirect url from query string
+        const ALLOWED = [
+            "https://www.khanacademy.org/economics-finance-domain/core-finance/investment-vehicles-tutorial/ira-401ks/v/traditional-iras"
+        ];
+        if (!ALLOWED.includes(req.query.url)) {
+            return res.status(400).send("Invalid redirect URL");
+        }
         return res.redirect(req.query.url);
     });
 
